@@ -37,6 +37,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
             // replys if the user is streaming
             let testDate = new Date();
             const userDb = await userModel.findOne({ discordId: newState.member.user.id });
+            newState.guild.channels.cache.find(c => c.id === "939977894812352563").send("<@&939976983729803304> " + newState.member.user.username + " just went live!");
             if(userDb !== null) {
                 //add code for user who exist in db
                 const deleteDb = await userModel.findOneAndRemove({ discordId: newState.member.user.id }).then(async function createNew() {
