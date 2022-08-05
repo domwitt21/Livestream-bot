@@ -94,16 +94,6 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
         const updateStatusTwo = await userModel.findOneAndUpdate({ discordId: newState.member.user.id }, { $unset: { status: "Active" } });
         const updateStatusThree = await userModel.findOneAndUpdate({ discordId: newState.member.user.id }, { $set: { status: "Inactive" } });
         const userUpdate = await userModel.findOne({ discordId: newState.member.user.id });
-        const dltLast = testChannel.lastMessage;
-        dltLast.delete();
-        const joinButton = new ActionRowBuilder()
-            .setComponents(
-                new ButtonBuilder()
-                    .setLabel("Click to join!")
-                    .setEmoji("🎥")
-                    .setStyle(ButtonStyle.Link)
-                    .setURL(`${inviteVar.url}`)
-            );
         const testEmbed = new EmbedBuilder()
             .setTitle(newState.member.user.username + " was just live!")
             .addFields([
