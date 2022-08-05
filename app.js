@@ -37,7 +37,22 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
             // replys if the user is streaming
             let testDate = new Date();
             const userDb = await userModel.findOne({ discordId: newState.member.user.id });
-            newState.guild.channels.cache.find(c => c.id === "939977894812352563").send("<@&939976983729803304> " + newState.member.user.username + " just went live!");
+            const inviteVar = await newState.channel.createInvite({maxUses: 0});
+            const joinButton = new ActionRowBuilder()
+            .setComponents(
+                new ButtonBuilder()
+                    .setLabel("Click to join!")
+                    .setEmoji("🎥")
+                    .setStyle(ButtonStyle.Link)
+                    .setURL(`${inviteVar.url}`)
+            );
+            const inviteEmbed = new EmbedBuilder()
+                .setColor("DarkRed")
+                .setTitle("*" + newState.member.user.username + " has started live streaming!*")
+                .setAuthor({name: client.user.username ,iconURL: client.user.avatarURL()})
+
+            const voiceChannel = newState.guild.channels.cache.find(c => c.id === "939977894812352563");
+            voiceChannel.send({content: `<@&939976983729803304> ${newState.member.user.username} just went live!`, embeds: [inviteEmbed], components: [joinButton]});
             if(userDb !== null) {
                 //add code for user who exist in db
                 const deleteDb = await userModel.findOneAndRemove({ discordId: newState.member.user.id }).then(async function createNew() {
@@ -65,18 +80,30 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
                     status: "Active"
                 });
             }
-            newState.guild.channels.cache.find(c => c.id === "939977894812352563").send("<@&939976983729803304> " + newState.member.user.username + " just went live!");
+            const channelNeeded = newState.guild.channels.cache.find(c => c.id === "939977894812352563");
+            channelNeeded.send({content: `<@&939976983729803304> ${newState.member.user.username} just went live!`, embeds: [inviteEmbed], components: [joinButton]});
             return;
         };
     } else if(oldState.streaming) {
         // replys when the user has stopped streaming
         const newRole = client.guilds.cache.find(g => g.id === "211441386673799178").roles.cache.find(r => r.id === "939989750222311504");
+        const testChannel = newState.guild.channels.cache.find(c => c.id === "939977894812352563");
         newState.member.roles.remove(newRole);
         let newDate = new Date();
         const updateStatusOne = await userModel.findOneAndUpdate({ discordId: newState.member.user.id }, { $set: { endLive: newDate.toLocaleDateString() + " " + newDate.toLocaleTimeString() } });
         const updateStatusTwo = await userModel.findOneAndUpdate({ discordId: newState.member.user.id }, { $unset: { status: "Active" } });
         const updateStatusThree = await userModel.findOneAndUpdate({ discordId: newState.member.user.id }, { $set: { status: "Inactive" } });
         const userUpdate = await userModel.findOne({ discordId: newState.member.user.id });
+        const dltLast = testChannel.lastMessage;
+        dltLast.delete();
+        const joinButton = new ActionRowBuilder()
+            .setComponents(
+                new ButtonBuilder()
+                    .setLabel("Click to join!")
+                    .setEmoji("🎥")
+                    .setStyle(ButtonStyle.Link)
+                    .setURL(`${inviteVar.url}`)
+            );
         const testEmbed = new EmbedBuilder()
             .setTitle(newState.member.user.username + " was just live!")
             .addFields([
